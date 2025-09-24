@@ -195,6 +195,11 @@ for source_dir in source_dirs:
 - Enable fine-tuning for better accuracy
 - Use SSD storage for faster SQLite access
 
+### Illustrations
+
+![A Graph Result](pictures/result_example.png)
+
+
 ## File Structure
 
 ```
@@ -211,8 +216,7 @@ KG_project/
 │   └── 20250920_043524_kg_local.sqlite
 ├── kg_local.sqlite        # Current results
 ├── kg_local.png          # Static visualization
-├── kg_local.html         # Interactive visualization
-└── finetuning_data.jsonl # Training data (if generated)
+└── kg_local.html         # Interactive visualization
 ```
 
 ## Contributing

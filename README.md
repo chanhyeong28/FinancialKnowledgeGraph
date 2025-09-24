@@ -7,7 +7,6 @@ A purpose-built system for extracting financial knowledge graphs from unstructur
 - **Purpose-built Financial Ontology**: Uses `schema.py` with entities and relations specifically designed for price prediction
 - **Dynamic Interactive Visualization**: Both static PNG and interactive HTML graphs with hover details
 - **Local LLM Support**: Works with Ollama models (llama3.2, etc.)
-- **Fine-tuning Capabilities**: Create custom training data and fine-tune models for better financial extraction
 - **Automatic Backup**: Preserves previous results with timestamp-based backups
 - **SQLite Storage**: Raw data accessible via SQL queries
 - **Multi-format Support**: PDF, TXT, MD files with file-type detection
@@ -17,7 +16,6 @@ A purpose-built system for extracting financial knowledge graphs from unstructur
 ### 1. Setup
 
 ```bash
-cd /Users/chanhyeong28/KG_project
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
@@ -30,8 +28,6 @@ Create `.env` file:
 # Ollama model (default: llama3.2)
 OLLAMA_MODEL=llama3.2
 
-# Optional: Enable fine-tuning
-ENABLE_FINETUNING=false
 ```
 
 ### 3. Add Source Files
@@ -54,8 +50,6 @@ ollama serve
 # Basic run
 python langgraph_local_kg.py
 
-# With fine-tuning enabled
-python langgraph_local_kg.py --finetune
 ```
 
 ## Output Files
@@ -130,46 +124,6 @@ The system uses a purpose-built ontology (`schema.py`) with entities specificall
 - **DRIVES_SENTIMENT**: Events/indicators influencing market mood
 - **REPORTS_ON**: Source documents reporting on entities
 - **COINTEGRATED_WITH**: Statistical long-run linkages
-
-## Fine-tuning Local LLMs
-
-### 1. Generate Training Data
-
-```bash
-python langgraph_local_kg.py --finetune
-```
-
-This creates:
-- **`finetuning_data.jsonl`**: Training examples
-- **`Modelfile`**: Ollama configuration
-
-### 2. Fine-tune Model
-
-```bash
-# Create fine-tuned model
-ollama create llama3.2_financial -f Modelfile
-
-# Use fine-tuned model
-export OLLAMA_MODEL=llama3.2_financial
-python langgraph_local_kg.py
-```
-
-### 3. Fine-tuning Methods Explained
-
-**Parameter Tuning**:
-- Lower temperature (0.1) for consistent extraction
-- Optimized top_p and repeat_penalty for financial text
-- Custom system prompts for financial domain
-
-**Training Data Creation**:
-- Extracts examples from your source documents
-- Creates expected completions based on financial ontology
-- Focuses on price-driving relationships
-
-**Model Enhancement**:
-- Specialized prompts for financial entity recognition
-- Domain-specific relationship extraction
-- Improved confidence scoring
 
 ## Advanced Usage
 

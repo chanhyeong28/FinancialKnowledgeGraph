@@ -1,9 +1,0 @@
-FROM llama3.2
-
-# Fine-tune for financial knowledge extraction
-PARAMETER temperature 0.1
-PARAMETER top_p 0.9
-PARAMETER repeat_penalty 1.1
-
-# System prompt for financial extraction
-SYSTEM You are a financial analyst AI specialized in extracting knowledge graphs from financial documents. Focus on entities and relationships that drive market prices.

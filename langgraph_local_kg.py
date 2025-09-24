@@ -173,6 +173,7 @@ def extract_json_from_text(text: str) -> dict:
 		
 		return result
 
+#### This is another way to extract triples, separating the text into chunks and processing each chunk separately
 # def extract_triples(llm: Ollama, text: str, plan: KGPlan) -> List[Dict[str, Any]]:
 #     # Get available entity types and relations from the ontology
 # 	entity_types = plan.nodes
@@ -462,79 +463,6 @@ def draw_graph(G: nx.DiGraph, out_path: str) -> None:
     if PYVIS_AVAILABLE:
         create_pyvis_graph(G, out_path.replace('.png', '_pyvis.html'))
 
-# def draw_graph(G: nx.DiGraph, out_path: str) -> None:
-# 	"""Create both static PNG and interactive HTML visualizations."""
-# 	# Static PNG version (existing functionality)
-# 	plt.figure(figsize=(14, 12))
-# 	pos = nx.spring_layout(G, seed=42, k=3, iterations=50)
-	
-# 	# Color nodes by type based on the financial ontology
-# 	node_colors = []
-# 	for n in G.nodes():
-# 		node_type = G.nodes[n].get("type", "Unknown")
-# 		if node_type == "Instrument":
-# 			node_colors.append("red")
-# 		elif node_type == "EconomicIndicator":
-# 			node_colors.append("blue")
-# 		elif node_type == "Company":
-# 			node_colors.append("orange")
-# 		elif node_type == "Event":
-# 			node_colors.append("purple")
-# 		elif node_type == "Sentiment":
-# 			node_colors.append("pink")
-# 		elif node_type == "PolicyAction":
-# 			node_colors.append("brown")
-# 		elif node_type == "Source":
-# 			node_colors.append("green")
-# 		elif node_type == "IndicatorPrint":
-# 			node_colors.append("cyan")
-# 		else:
-# 			node_colors.append("gray")
-	
-	# # Draw nodes and edges
-	# nx.draw(G, pos, with_labels=False, node_size=600, alpha=0.8, node_color=node_colors, 
-	# 		edge_color='gray', arrows=True, arrowsize=20, arrowstyle='->')
-	
-	# # Add node labels
-	# labels = {n: (G.nodes[n].get("name") or n.split("::")[-1]) for n in G.nodes()}
-	# nx.draw_networkx_labels(G, pos, labels, font_size=9, font_weight="bold")
-	
-	# # Add edge labels (relationships)
-	# edge_labels = {}
-	# for u, v, data in G.edges(data=True):
-	# 	rel = data.get("rel", "")
-	# 	confidence = data.get("confidence", "")
-	# 	label = rel
-	# 	if confidence:
-	# 		label += f" ({confidence})"
-	# 	edge_labels[(u, v)] = label
-	
-	# nx.draw_networkx_edge_labels(G, pos, edge_labels, font_size=7, 
-	# 							 bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
-	
-	# # Add legend based on financial ontology
-	# legend_elements = [
-	# 	plt.scatter([], [], c="red", label="Instrument"),
-	# 	plt.scatter([], [], c="blue", label="EconomicIndicator"),
-	# 	plt.scatter([], [], c="orange", label="Company"),
-	# 	plt.scatter([], [], c="purple", label="Event"),
-	# 	plt.scatter([], [], c="pink", label="Sentiment"),
-	# 	plt.scatter([], [], c="brown", label="PolicyAction"),
-	# 	plt.scatter([], [], c="green", label="Source"),
-	# 	plt.scatter([], [], c="cyan", label="IndicatorPrint"),
-	# 	plt.scatter([], [], c="gray", label="Other")
-	# ]
-	# plt.legend(handles=legend_elements, loc="upper right", fontsize=9)
-	
-	# plt.title("Financial Knowledge Graph", fontsize=18, fontweight="bold", pad=20)
-	# plt.tight_layout()
-	# plt.savefig(out_path, dpi=160, bbox_inches="tight")
-	# plt.close()
-	
-	# # Interactive HTML version
-	# if PLOTLY_AVAILABLE:
-	# 	create_interactive_graph(G, out_path.replace('.png', '.html'))
-
 
 def create_interactive_graph(G: nx.DiGraph, html_path: str) -> None:
 	"""Create an interactive Plotly visualization of the knowledge graph."""
@@ -660,99 +588,6 @@ def create_interactive_graph(G: nx.DiGraph, html_path: str) -> None:
 	print(f"Interactive graph saved to: {html_path}")
 
 
-def create_finetuning_data(source_files: List[SourceFile], output_path: str = "finetuning_data.jsonl") -> None:
-	"""Create fine-tuning data for local LLM based on financial ontology."""
-	finetuning_examples = []
-	
-	for sf in source_files:
-		# Create examples for entity extraction
-		example = {
-			"prompt": f"Extract financial entities and relationships from this {sf.file_type} text for price prediction:\n\n{sf.content[:1000]}...",
-			"completion": create_expected_completion(sf.content, sf.file_type)
-		}
-		finetuning_examples.append(example)
-	
-	# Write to JSONL format
-	with open(output_path, 'w') as f:
-		for example in finetuning_examples:
-			f.write(json.dumps(example) + '\n')
-	
-	print(f"Fine-tuning data created: {output_path}")
-
-
-def create_expected_completion(text: str, file_type: str) -> str:
-	"""Create expected completion for fine-tuning based on financial ontology."""
-	text_lower = text.lower()
-	
-	# Extract entities based on ontology
-	entities = []
-	relations = []
-	
-	if "jobs report" in text_lower or "payroll" in text_lower:
-		entities.append({
-			"type": "EconomicIndicator",
-			"name": "Jobs Report",
-			"indicator_name": "Nonfarm Payrolls",
-			"freq": "M",
-			"region": "US"
-		})
-	
-	if "goldman sachs" in text_lower:
-		entities.append({
-			"type": "Company",
-			"name": "Goldman Sachs",
-			"ticker": "GS",
-			"country": "US"
-		})
-	
-	if "markets" in text_lower:
-		entities.append({
-			"type": "Instrument",
-			"name": "US Markets",
-			"instrument_type": "Index"
-		})
-	
-	# Create relations
-	if len(entities) >= 2:
-		relations.append({
-			"source": entities[0],
-			"relation": "AFFECTS_PRICE_OF",
-			"target": entities[-1],
-			"props": {"direction": "DOWN", "confidence": 0.8}
-		})
-	
-	return json.dumps({
-		"entities": entities,
-		"relations": relations,
-		"reasoning": f"Extracted {len(entities)} entities and {len(relations)} relationships from {file_type} content focusing on price-driving factors."
-	})
-
-
-def run_ollama_finetuning(model_name: str, data_path: str) -> None:
-	"""Run fine-tuning on Ollama model."""
-	print(f"Starting fine-tuning for model: {model_name}")
-	print(f"Training data: {data_path}")
-	
-	# Create Modelfile for fine-tuning
-	modelfile_content = f"""FROM {model_name}
-
-# Fine-tune for financial knowledge extraction
-PARAMETER temperature 0.1
-PARAMETER top_p 0.9
-PARAMETER repeat_penalty 1.1
-
-# System prompt for financial extraction
-SYSTEM You are a financial analyst AI specialized in extracting knowledge graphs from financial documents. Focus on entities and relationships that drive market prices.
-"""
-	
-	with open("Modelfile", "w") as f:
-		f.write(modelfile_content)
-	
-	print("Modelfile created. To fine-tune:")
-	print(f"1. ollama create {model_name}_finetuned -f Modelfile")
-	print(f"2. Use the fine-tuned model: OLLAMA_MODEL={model_name}_finetuned")
-
-
 def run_pipeline(source_dir: str = "source", enable_finetuning: bool = False) -> Tuple[str, str]:
 	load_dotenv()
 	ollama_model = os.getenv("OLLAMA_MODEL", "llama3.2")
@@ -775,12 +610,7 @@ def run_pipeline(source_dir: str = "source", enable_finetuning: bool = False) ->
 	source_files = load_source_files(source_dir)
 	print(f"Found {len(source_files)} source files: {[sf.file_type for sf in source_files]}")
 
-	# Create fine-tuning data if enabled
-	if enable_finetuning:
-		print("Creating fine-tuning data...")
-		create_finetuning_data(source_files)
-		run_ollama_finetuning(ollama_model, "finetuning_data.jsonl")
-
+	
 	# LangGraph state
 	class State(dict):
 		source_files: List[SourceFile]
@@ -846,15 +676,8 @@ def run_pipeline(source_dir: str = "source", enable_finetuning: bool = False) ->
 
 if __name__ == "__main__":
 	import sys
-	
-	# Check for fine-tuning flag
-	enable_finetuning = "--finetune" in sys.argv or "-f" in sys.argv
-	
-	if enable_finetuning:
-		print("Running with fine-tuning enabled...")
-		db, img = run_pipeline("source", enable_finetuning=True)
-	else:
-		db, img = run_pipeline("source")
+		
+	db, img = run_pipeline("source")
 	
 	print(f"Pipeline completed: {db}, {img}")
 	print(f"Interactive visualization: {img.replace('.png', '.html')}")

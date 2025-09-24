@@ -76,6 +76,10 @@ python langgraph_local_kg.py
 - **Color-coded entities**: Different colors for each entity type
 - **Professional styling**: Publication-ready graphs
 
+### Illustrations
+
+![A Graph example](pictures/result_example.png)
+
 ### Raw Data Queries
 
 ```bash
@@ -282,10 +286,6 @@ fig.update_layout(
 
 fig.write_html("custom_kg_visualization.html")
 ```
-### Illustrations
-
-![A Graph example](pictures/result_example.png)
-
 ## Troubleshooting
 
 ### Common Issues

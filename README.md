@@ -282,6 +282,9 @@ fig.update_layout(
 
 fig.write_html("custom_kg_visualization.html")
 ```
+### Illustrations
+
+![A Graph example](pictures/result_example.png)
 
 ## Troubleshooting
 
@@ -342,34 +345,28 @@ print("Extracted relationships:")
 print(relations[['source', 'rel', 'target']].head(10))
 con.close()
 ```
+## Key Files Description
 
-## File Structure
+| File/Directory | Purpose | Generated |
+|----------------|---------|-----------|
+| `langgraph_local_kg.py` | Main pipeline script with LangGraph workflows | ❌ |
+| `schema.py` | Financial ontology with entities and relationships | ❌ |
+| `requirements.txt` | Python package dependencies | ❌ |
+| `.env` | Environment variables (Ollama model config) | ❌ |
+| `source/` | Input financial documents (PDFs, transcripts) | ❌ |
+| `backup/` | Timestamped backups of previous runs | ✅ |
+| `kg_local.sqlite` | SQLite database with extracted entities/relationships | ✅ |
+| `kg_local_pyvis.html` | Interactive network visualization (Pyvis) | ✅ |
+| `kg_local_plotly.html` | Interactive network visualization (Plotly) | ✅ |
+| `lib/` | Static assets for HTML visualizations | ✅ |
 
-FinancialKnowledgeGraph/
-├── langgraph_local_kg.py # Main pipeline with LangGraph
-├── schema.py # Financial ontology definitions
-├── requirements.txt # Python dependencies
-├── README.md # This documentation
-├── .env # Environment configuration
-├── source/ # Input documents
-│ ├── report_[DB]US Fixed Income Weekly.pdf
-│ ├── report_GS_US Daily Q&A on the Revisions in the July Employment Report.pdf
-│ ├── report_MS_US Economics_ large downward revision to nfp.pdf
-│ ├── report_US_July Employment Recap.pdf
-│ ├── transcript_GS250724.pdf
-│ └── transcript_GS250731.pdf
-├── backup/ # Timestamped backups
-│ ├── 20250925_031509_kg_local.sqlite
-│ └── 20250925_031549_kg_local.sqlite
-├── pictures/ # Documentation images
-│ └── result_example.png
-├── lib/ # Visualization libraries
-│ ├── bindings/
-│ ├── tom-select/
-│ └── vis-9.1.2/
-├── kg_local.sqlite # Current results database
-├── kg_local_pyvis.html # Pyvis interactive visualization
-└── kg_local_plotly.html # Plotly interactive visualization
+### Directory Purposes
+
+- **`source/`**: Place your financial documents here. Supports PDF, TXT, and MD files
+- **`backup/`**: Automatic backups created before each run with timestamp format `YYYYMMDD_HHMMSS_`
+- **`lib/`**: Contains JavaScript libraries for interactive visualizations
+- **`pictures/`**: Documentation images and examples
+- **`__pycache__/`**: Python bytecode cache (can be safely deleted)
 
 ## Dependencies
 
